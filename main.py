@@ -4,6 +4,7 @@ import import_animation_frames as anim
 import Parent_constrain_bones_to_joints as cstrain
 import mirror_keys as mir
 import loop_animation_keys as loop
+import denoise_moition_data as denoise
 
 import os
 from maya import OpenMayaUI as omui
@@ -12,10 +13,10 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from shiboken2 import wrapInstance
 
-class FirstToolUI(QWidget):
+class KomodoToolsUI(QWidget):
 
     def __init__(self, parent=None):
-        super(FirstToolUI, self).__init__(parent)
+        super(KomodoToolsUI, self).__init__(parent)
 
         self.setWindowFlags(Qt.Window)
 
@@ -25,10 +26,14 @@ class FirstToolUI(QWidget):
         # Customize some window values
         self.setWindowTitle('Komodo Tools')
         self.setGeometry(50, 50, 500, 500)
-        #global variables 
+        #  ~~ GLOBAL CLASS VARS ~~  
         #import animation global vars
         self.file_path_hind = ''
         self.file_path_fore = ''
+        self.denoise_mot_hind_path = ''
+        self.denoise_mot_fore_path = ''
+        self.denoise_csv_hind_path = ''
+        self.denoise_csv_fore_path = ''
         #loop Keys global vars
         self.loop_mode = 0
         self.loop_value = 1
@@ -46,17 +51,17 @@ class FirstToolUI(QWidget):
         # denoise source file widgets
         denoise_f_mot_label = QLabel("Select .mot mocap source files")
         self.denoise_f_hind_mot_path = QLineEdit()
-        self.configure_QLineedit(self.denoise_f_hind_mot_path, "Browse hindlimb motfile...")
+        self.configure_QLineEdit_widgets(self.denoise_f_hind_mot_path, "Browse hindlimb motfile...")
         self.denoise_f_fore_mot_path = QLineEdit()
-        self.configure_QLineedit(self.denoise_f_fore_mot_path, "Browse forelimb motfile...")
+        self.configure_QLineEdit_widgets(self.denoise_f_fore_mot_path, "Browse forelimb motfile...")
         self.denoise_f_hind_mot_btn = QPushButton(text = "open", parent = self)
         self.denoise_f_fore_mot_btn = QPushButton(text = "open", parent = self)
         # denoise smoothed file widgets
         denoise_f_csv_label = QLabel( "set denoised .csv file locations" )
         self.denoise_f_hind_csv_path = QLineEdit()
-        self.configure_QLineedit(self.denoise_f_hind_csv_path, "Set hindlimb filename/location")
+        self.configure_QLineEdit_widgets(self.denoise_f_hind_csv_path, "Set hindlimb filename/location")
         self.denoise_f_fore_csv_path = QLineEdit()
-        self.configure_QLineedit(self.denoise_f_fore_csv_path, "Set forelimb filename/location")
+        self.configure_QLineEdit_widgets(self.denoise_f_fore_csv_path, "Set forelimb filename/location")
         self.denoise_f_hind_csv_btn = QPushButton(text = "save as", parent = self)
         self.denoise_f_fore_csv_btn = QPushButton(text = "save as", parent = self)
         #denoise button    
@@ -93,12 +98,12 @@ class FirstToolUI(QWidget):
         #Import animation Widgets
         self.use_denoise_fpath = QCheckBox(text = "Use Denoised file" , parent = self)
         self.import_anim_btn = QPushButton( text = "Import Animation", parent = self)
-        self.import_anim_path = QLineEdit()
-        self.configure_QLineedit(self.import_anim_path,"Browse hindlimb file...")
-        self.sel_anim_path = QPushButton(text = "open", parent = self)
-        self.import_anim_path2 = QLineEdit()
-        self.configure_QLineedit(self.import_anim_path2, "Browse forelimb file...")
-        self.sel_anim_path2 = QPushButton(text = "open", parent = self)
+        self.import_anim_hind_path = QLineEdit()
+        self.configure_QLineEdit_widgets(self.import_anim_hind_path,"Browse hindlimb file...")
+        self.open_anim_hind_path = QPushButton(text = "open", parent = self)
+        self.import_anim_fore_path = QLineEdit()
+        self.configure_QLineEdit_widgets(self.import_anim_fore_path, "Browse forelimb file...")
+        self.open_anim_fore_path = QPushButton(text = "open", parent = self)
         
         import_anim_grp_box = QGroupBox("Import Animation from CSV")
         import_anim_layout = QVBoxLayout()
@@ -109,14 +114,14 @@ class FirstToolUI(QWidget):
         import_anim_layout.addLayout(import_anim_btn_layout)
         import_anim_grp_box.setLayout(import_anim_layout)
         #adding widgets to grid layout (import_amin_layout)
-        #import_anim_path_layout.addRow( self.import_anim_path, self.sel_anim_path)
-        #import_anim_path_layout.addRow( self.import_anim_path2,self.sel_anim_path2)
-        import_anim_path_layout.addWidget( self.import_anim_path, 0,0)
-        import_anim_path_layout.addWidget( self.sel_anim_path, 0,1)
-        import_anim_path_layout.addWidget( self.import_anim_path2, 1,0)
-        import_anim_path_layout.addWidget(self.sel_anim_path2,1,1)
-        #import_anim_path_layout.addRow( self.sel_anim_path,self.import_anim_path)
-        #import_anim_path_layout.addRow( self.sel_anim_path2, self.import_anim_path2)
+        #import_anim_path_layout.addRow( self.import_anim_hind_path, self.open_anim_hind_path)
+        #import_anim_path_layout.addRow( self.import_anim_fore_path,self.open_anim_fore_path)
+        import_anim_path_layout.addWidget( self.import_anim_hind_path, 0,0)
+        import_anim_path_layout.addWidget( self.open_anim_hind_path, 0,1)
+        import_anim_path_layout.addWidget( self.import_anim_fore_path, 1,0)
+        import_anim_path_layout.addWidget(self.open_anim_fore_path,1,1)
+        #import_anim_path_layout.addRow( self.open_anim_hind_path,self.import_anim_hind_path)
+        #import_anim_path_layout.addRow( self.open_anim_fore_path, self.import_anim_fore_path)
         import_anim_btn_layout.addWidget(self.import_anim_btn)
       # mirror widgets
         self.mirror_keys_btn = QPushButton( text = "Mirror Keys", parent = self)
@@ -164,7 +169,7 @@ class FirstToolUI(QWidget):
         layout.addWidget(loop_grp_box)
         
         self.setLayout(layout)
-    def configure_QLineedit(self,widget: QLineEdit,pholder_text : str) -> None:
+    def configure_QLineEdit_widgets(self,widget: QLineEdit,pholder_text : str) -> None:
         widget.setReadOnly(True)
         widget.setPlaceholderText(pholder_text)
         widget.setMinimumWidth(250)
@@ -204,9 +209,9 @@ class FirstToolUI(QWidget):
     def connect_ui(self):
         self.use_denoise_fpath.stateChanged.connect(self.update_import_anim_file)
         self.constrain_btn.clicked.connect(cstrain.constrain_bones )
-        self.sel_anim_path.clicked.connect(lambda: self.get_anim_data(True))
-        self.sel_anim_path2.clicked.connect(lambda: self.get_anim_data(False))
-        self.import_anim_btn.clicked.connect(lambda: anim.create_animation(self.file_path_hind,self.file_path_fore))
+        self.open_anim_hind_path.clicked.connect(lambda: self.get_anim_data(True))
+        self.open_anim_fore_path.clicked.connect(lambda: self.get_anim_data(False))
+        self.import_anim_btn.clicked.connect(self.import_animation_wrapper)
         self.mirror_keys_btn.clicked.connect(mir.mirror)
         self.loop_mode_list.currentRowChanged.connect(self.update_loop_mode )
         self.loop_mode_list.currentRowChanged.connect(self.set_loop_stack_display)
@@ -220,12 +225,17 @@ class FirstToolUI(QWidget):
         self.master_stack.setCurrentIndex(i)
     def update_import_anim_file(self):
         if self.use_denoise_fpath.isChecked():
-            self.sel_anim_path.setDisabled(True)
-            self.sel_anim_path2.setDisabled(True)
+            self.open_anim_hind_path.setDisabled(True)
+            self.open_anim_fore_path.setDisabled(True)
         else:
-            self.sel_anim_path.setDisabled(False)
-            self.sel_anim_path2.setDisabled(False)
+            self.open_anim_hind_path.setDisabled(False)
+            self.open_anim_fore_path.setDisabled(False)
 
+    def import_animation_wrapper(self):
+        if self.use_denoise_fpath.isChecked() == True:
+            anim.create_animation(self.denoise_csv_hind_path,self.denoise_csv_fore_path)
+        else:
+            anim.create_animation(self.file_path_hind,self.file_path_fore)
 
     def set_loop_count_display(self,i):
         self.loop_count_num.setText(i)
@@ -244,10 +254,10 @@ class FirstToolUI(QWidget):
         cwd = os.getcwd()
         if isHind == True:
             self.file_path_hind = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo_dragon_scripts",filter )[0]
-            self.import_anim_path.setText(self.file_path_hind)
+            self.import_anim_hind_path.setText(self.file_path_hind)
         else:
             self.file_path_fore = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo_dragon_scripts",filter )[0]
-            self.import_anim_path2.setText(self.file_path_fore)
+            self.import_anim_fore_path.setText(self.file_path_fore)
         #print(self.file_path_hind)
     def set_anim_data(self,isHind: bool):
         pass
@@ -262,5 +272,5 @@ def get_main_window():
 
 # Get Maya's main window to parent to
 maya_window = get_main_window()
-tool = FirstToolUI(maya_window)
+tool = KomodoToolsUI(maya_window)
 tool.show()

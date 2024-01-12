@@ -21,7 +21,8 @@ HAND_OFFSET = 20
 
 
 def generate_csv(pfile_name,hind: bool,pval_range: bool,pnew_name: str):  
-    os.chdir("/Users/paulmerzliakov/Desktop/programming/dev/3D_stuff/Komodo_dragon_scripts")
+    repo_dir = "C:\\Users\\paulm\\Documents\\maya\\2022\\scripts\\Komodo_dragon_scripts"
+    os.chdir(repo_dir)
     lines= []
     num_of_lines = 0
     if hind == True:
@@ -87,7 +88,8 @@ def generate_csv(pfile_name,hind: bool,pval_range: bool,pnew_name: str):
     csv_array = savgol_filter(array,1000,3,axis = 0)#right leg joints are index 14 to 20
     # print(csv_array[0]) 
     # csv_array = numpy.array(array)
-
+    smoothed_dir = repo_dir + "\\smoothed_data"
+    os.chdir(smoothed_dir)
     numpy.savetxt(pnew_name, csv_array,fmt = '%.3f',delimiter = ",")
     
 #right leg
