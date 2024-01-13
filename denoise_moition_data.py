@@ -19,28 +19,32 @@ TWIST_OFFSET = 125
 WRIST_OFFSET = 60
 HAND_OFFSET = 20
 
-
-def generate_csv(pfile_name,hind: bool,pval_range: bool,pnew_name: str):  
-    repo_dir = "C:\\Users\\paulm\\Documents\\maya\\2022\\scripts\\Komodo_dragon_scripts"
-    os.chdir(repo_dir)
-    lines= []
+def generate_csv(mot_file_path: str,csv_file_path: str,hind: bool,collum_endpoint: int):  
+    f_dir, mot_file_name = os.path.split(mot_file_path)
+    smoothed_dir,csv_file_name = os.path.split(csv_file_path)
+    #print("f_dir is", f_dir)
+    #print("mot_file_name_is", mot_file_name)
+    
+    os.chdir(f_dir)
+    str_lines= []
     num_of_lines = 0
     if hind == True:
         start = 451
     else:
         start = 11
-    with open(pfile_name) as f:
+    with open(mot_file_name) as f:
         flines = f.readlines()
         num_of_lines += len(flines)
-        for i in range(start,num_of_lines): #these are the lines that have the actual values
-            lines.append(flines[i])
+        for i in range(start,num_of_lines): #these are the str_lines that have the actual values
+            str_lines.append(flines[i])
     array= []
-    for each in lines:
+    for each in str_lines:
         splitlines = []
         for val in each.split("\t"):
             splitlines.append(float(val.strip()))
-        array.append(splitlines[1:pval_range[1]] + splitlines[14:21])
-    
+        array.append(splitlines[1:collum_endpoint] + splitlines[14:21])
+    print("length", len(array[0]))
+    print(array[0] )
     if hind == True:
         for each in array:
         #pelvis pitch
@@ -85,14 +89,13 @@ def generate_csv(pfile_name,hind: bool,pval_range: bool,pnew_name: str):
         #knee flexion
             each[9] -= HAND_OFFSET
 
-    csv_array = savgol_filter(array,1000,3,axis = 0)#right leg joints are index 14 to 20
+    csv_array = savgol_filter(array,555,3,axis = 0)#right leg joints are index 14 to 20
     # print(csv_array[0]) 
     # csv_array = numpy.array(array)
-    smoothed_dir = repo_dir + "\\smoothed_data"
     os.chdir(smoothed_dir)
-    numpy.savetxt(pnew_name, csv_array,fmt = '%.3f',delimiter = ",")
-    
+    numpy.savetxt(csv_file_name, csv_array,fmt = '%.3f',delimiter = ",")
+
 #right leg
-generate_csv( "komodo06_run12_left_hind_IK.mot",True, (1,7), "Varius_right_hind_smoothed.csv" )
-generate_csv( "komodo06_run12_left_fore_IK_output rotmat_v2.mot",False, (1,4), "Varius_right_fore_smoothed.csv" )
+#generate_csv( "komodo06_run12_left_hind_IK.mot",True, (1,7), "Varius_right_hind_smoothed.csv" )
+#generate_csv( "komodo06_run12_left_fore_IK_output rotmat_v2.mot",False, (1,4), "Varius_right_fore_smoothed.csv" )
 

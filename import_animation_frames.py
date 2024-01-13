@@ -57,7 +57,7 @@ def set_key(cntroller,start_frame,data):
                     cmds.setInfinity(each, postInfinite = "cycle")
                     cmds.setInfinity(each, preInfinite = "cycle")
 
-def create_animation(hind_path = "C:\\Users\\paulm\\Documents\\maya\\2022\\scripts\\Komodo_dragon_scripts\\smoothed_data\\Varius_right_hind_smoothed.csv", fore_path = "C:\\Users\\paulm\\Documents\\maya\\2022\\scripts\\Komodo_dragon_scripts\\smoothed_data\\Varius_right_fore_smoothed.csv",*args):
+def create_animation(hind_path, fore_path ,*args):
     hind_controller_names = [
         "IKSpine1_M.rotateX","IKSpine1_M.rotateZ", "IKSpine1_M.rotateY","Main.translateZ","Main.translateX","Main.translateY","FKHip_R.rotateY","FKHip_R.rotateZ","FKHip_R.rotateX",
         "FKKnee_R.rotateZ","FKTwistLeg_R.rotateX","FKToes1_R.rotateX","FKBigToe1_R.rotateZ","FKIndexToe1_R.rotateZ","FKMiddleToe1_R.rotateZ", "FKRingToe1_R.rotateZ", "FKPinkyToe1_R.rotateZ"
