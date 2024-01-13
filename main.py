@@ -253,11 +253,11 @@ class KomodoToolsUI(QWidget):
     def get_csv_filepath(self,isHind: bool):
         filter = "*.csv"
         if isHind == True:
-            self.file_path_hind = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
-            self.import_anim_hind_path.setText(self.file_path_hind)
+            self.file_path_hind_var = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
+            self.import_anim_hind_path.setText(self.file_path_hind_var)
         else:
-            self.file_path_fore = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
-            self.import_anim_fore_path.setText(self.file_path_fore)
+            self.file_path_fore_var= QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
+            self.import_anim_fore_path.setText(self.file_path_fore_var)
 
     def get_mot_filepath(self,isHind: bool):
         filter = "*.mot"
