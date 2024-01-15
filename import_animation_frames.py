@@ -57,6 +57,8 @@ def set_key(cntroller,start_frame,data):
                     cmds.setInfinity(each, postInfinite = "cycle")
                     cmds.setInfinity(each, preInfinite = "cycle")
 
+
+
 def create_animation(hind_path, fore_path ,*args):
     hind_controller_names = [
         "IKSpine1_M.rotateX","IKSpine1_M.rotateZ", "IKSpine1_M.rotateY","Main.translateZ","Main.translateX","Main.translateY","FKHip_R.rotateY","FKHip_R.rotateZ","FKHip_R.rotateX",

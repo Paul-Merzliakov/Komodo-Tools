@@ -1,3 +1,4 @@
 *.mot
 *.csv
 __pycache__/
+komodo_colour_muscle_activation/

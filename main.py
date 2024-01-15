@@ -28,6 +28,7 @@ class KomodoToolsUI(QWidget):
         self.denoise_mot_fore_path_var = ''
         self.denoise_csv_hind_path_var = ''
         self.denoise_csv_fore_path_var = ''
+        self.denoise_mot_channels = []
         #-import animation global vars-
         self.file_path_hind_var = ''
         self.file_path_fore_var = ''
