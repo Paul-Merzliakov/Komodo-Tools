@@ -3,40 +3,46 @@ import os
 from scipy.signal import savgol_filter
 import numpy
 
-
-#offsets
-#leg
+#Hindlimb Offsets
 HIPZ_OFFSET = 10
 HIPX_OFFSET = 115
 PELVISY_OFFSET = 165
 KNEE_OFFSET = 85
 ANKLE_OFFSET = 115
-#arm
+#Forelimb Offsets
 SHOULDERZ_OFFSET = 10
 SHOULDERX_OFFSET = 115
 ELBOW_OFFSET = 80
 TWIST_OFFSET = 125
 WRIST_OFFSET = 60
 HAND_OFFSET = 20
-class MotFileData():
+
+HIND_DEFAULT_SELECTION = [0,1,2,3,4,5,13,14,15,16,17,18,19]
+FORE_DEFAULT_SELECTION = [0,1,2,13,14,15,16,17,18,19]
+
+
+class DenoiseFileData():
     def __init__(self):
-        self.endheader_index = 0
         self.num_of_lines = 0
+        self.animation_channels = []
+        self.mot_fpath = ""
+        self.csv_fpath = ""
+        self.is_hind = True
         
 
-    def process_mot_file(self,mot_file_path: str) -> list:
-        f_dir, mot_file_name = os.path.split(mot_file_path)
+    def get_anim_channels(self) -> list:
+        f_dir, mot_file_name = os.path.split(self.mot_fpath)
         os.chdir(f_dir)
         str_lines= []
         self.num_of_lines = 0
         with open(mot_file_name) as f:
             flines = f.readlines()
-            num_of_lines += len(flines)
-            for i in range(num_of_lines): #these are the str_lines that have the actual values
+            self.num_of_lines += len(flines)
+            for i in range(self.num_of_lines): #these are the str_lines that have the actual values
                 str_lines.append(flines[i])
 
-        self.endheader_index = self.get_end_of_header()
-        animation_channels = str_lines[self.endheader_index+1].split('\t')
+        endheader_index = self.get_end_of_header(str_lines)
+        self.animation_channels = str_lines[endheader_index].split('\t')[1:]
 
     def get_end_of_header(self,f_string_list : list) -> int:
         #The reason Im using this instead of reading the rows value on line 3 of .mot files is because soemtimes the rows value is incorrect (see the hind mot file for example)
@@ -46,18 +52,17 @@ class MotFileData():
             count += f_string_list[i].count("endheader")
             i += 1
         return i
-
-
-    def generate_csv(mot_file_path: str,csv_file_path: str,hind: bool,collum_endpoint: int):  
-        f_dir, mot_file_name = os.path.split(mot_file_path)
-        smoothed_dir,csv_file_name = os.path.split(csv_file_path)
+    def generate_csv(self,my_list):
+        #print("type: ", type(my_list), "contents:", my_list)  
+        channel_indexs = [i+1 for i in my_list]
+        f_dir, mot_file_name = os.path.split(self.mot_fpath)
+        smoothed_dir,csv_file_name = os.path.split(self.csv_fpath)
         #print("f_dir is", f_dir)
         #print("mot_file_name_is", mot_file_name)
-        
         os.chdir(f_dir)
         str_lines= []
         num_of_lines = 0
-        if hind == True:
+        if self.is_hind == True:
             start = 451
         else:
             start = 11
@@ -71,10 +76,10 @@ class MotFileData():
             splitlines = []
             for val in each.split("\t"):
                 splitlines.append(float(val.strip()))
-            array.append(splitlines[1:collum_endpoint] + splitlines[14:21])
-        #print("length", len(array[0]))
-        #print(array[0] )
-        if hind == True:
+            array_row = [splitlines[i] for i in channel_indexs]
+            array.append(array_row)
+        #need to make sure this doesnt run if the selection doesnt match the default values 
+        if self.is_hind == True and my_list == HIND_DEFAULT_SELECTION:
             for each in array:
             #pelvis pitch
                 each[0] *= -.5
@@ -98,7 +103,7 @@ class MotFileData():
                 each[10]  = -each[10]
             #ankle controller
                 each[11] += ANKLE_OFFSET +20
-        else: #for forelimb
+        elif my_list == FORE_DEFAULT_SELECTION: 
             for each in array:
         
             #chest Yaw/y 

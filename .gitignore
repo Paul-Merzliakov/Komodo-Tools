@@ -2,3 +2,5 @@
 *.csv
 __pycache__/
 komodo_colour_muscle_activation/
+temp.py 
+list_splicertest.py
