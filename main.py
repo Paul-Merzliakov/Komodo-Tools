@@ -16,12 +16,11 @@ class KomodoToolsUI(QWidget):
 
     def __init__(self, parent=None):
         super(KomodoToolsUI, self).__init__(parent)
-        self.setWindowFlags(Qt.Window)
-        # Set the object name     
-        self.setObjectName('FirstToolUI_uniqueId')
-        # Customize some window values
+        self.setWindowFlags(Qt.Window)     
+        self.setObjectName('KomodoTools_uniqueId')
         self.setWindowTitle('Komodo Tools')
         self.setGeometry(50, 50, 800, 800)
+
         #  ~~ GLOBAL CLASS VARS ~~  
         #-denoise_global vars. 
         self.denoise_hind_metadata = denoise.DenoiseFileData() #contains, file paths, channels, 
@@ -33,70 +32,39 @@ class KomodoToolsUI(QWidget):
         self.loop_mode = 0
         self.loop_value = 1
         self.loop_endframe = 6
-        #Add widgets to your window
-        self.build_ui()
+        
+        self.build_widgets()
+        self.set_layouts()
         self.connect_ui()
 
 
-    def build_ui(self):
-        layout = QVBoxLayout()
-        #     ~~~DENOISE UI~~~
-        #  -Denoise widgets-
-        # denoise source file widgets
-        self.denoise_f_mot_label = QLabel("Select .mot mocap source files")
-        self.denoise_f_hind_mot_path = QLineEdit()
-        self.configure_QLineEdit_widgets(self.denoise_f_hind_mot_path, "Browse hindlimb motfile...")
-        self.denoise_f_fore_mot_path = QLineEdit()
-        self.configure_QLineEdit_widgets(self.denoise_f_fore_mot_path, "Browse forelimb motfile...")
-        self.denoise_f_hind_mot_btn = QPushButton(text = "open", parent = self)
-        self.denoise_f_fore_mot_btn = QPushButton(text = "open", parent = self)
+    def build_widgets(self):
+
+        # ~~ DENOISE WIDGETS ~~
+        self.denoise_mot_label = QLabel("Select .mot mocap source files")
+        self.denoise_hind_mot_path = QLineEdit()
+        self.configure_QLineEdit_widgets(self.denoise_hind_mot_path, "Browse hindlimb motfile...")
+        self.denoise_fore_mot_path = QLineEdit()
+        self.configure_QLineEdit_widgets(self.denoise_fore_mot_path, "Browse forelimb motfile...")
+        self.denoise_hind_mot_btn = QPushButton(text = "open", parent = self)
+        self.denoise_fore_mot_btn = QPushButton(text = "open", parent = self)
         self.denoise_channels_hind_listw= QListWidget()
         self.denoise_channels_hind_listw.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.denoise_channels_fore_listw = QListWidget()
         self.denoise_channels_fore_listw.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        # denoise smoothed file widgets
-        self.denoise_f_csv_label = QLabel( "set denoised .csv file locations" )
-        self.denoise_f_hind_csv_path = QLineEdit()
-        self.configure_QLineEdit_widgets(self.denoise_f_hind_csv_path, "Set hindlimb filename/location")
-        self.denoise_f_fore_csv_path = QLineEdit()
-        self.configure_QLineEdit_widgets(self.denoise_f_fore_csv_path, "Set forelimb filename/location")
-        self.denoise_f_hind_csv_btn = QPushButton(text = "save as", parent = self)
-        self.denoise_f_fore_csv_btn = QPushButton(text = "save as", parent = self)
-        #denoise button    
-        self.denoise_f_btn = QPushButton(text = "create denoised file", parent = self )
-          # -Denoise Layout-
-        denoise_f_grp = QGroupBox("Clean .mot mocapfiles)")
-        denoise_f_layout = QVBoxLayout()
-        denoise_f_motpath_layout = QGridLayout()
-        denoise_f_csvpath_layout = QGridLayout()
-        #denoise_f_hind_channel_list_layout = QVBoxLayout()
-        #denoise_f_fore_channel_list_layout = QVBoxLayout()
+        self.denoise_csv_label = QLabel( "set denoised .csv file locations" )
+        self.denoise_hind_csv_path = QLineEdit()
+        self.configure_QLineEdit_widgets(self.denoise_hind_csv_path, "Set hindlimb filename/location")
+        self.denoise_fore_csv_path = QLineEdit()
+        self.configure_QLineEdit_widgets(self.denoise_fore_csv_path, "Set forelimb filename/location")
+        self.denoise_hind_csv_btn = QPushButton(text = "save as", parent = self)
+        self.denoise_fore_csv_btn = QPushButton(text = "save as", parent = self)
+        self.denoise_main_btn = QPushButton(text = "create denoised file", parent = self )
 
-        #denoise_f_hind_channel_list_layout.addWidget(self.denoise_channels_hind_listw)
-        #denoise_f_fore_channel_list_layout.addWidget(self.denoise_channels_fore_listw)
-
-        denoise_f_motpath_layout.addWidget(self.denoise_f_hind_mot_path,0,0)
-        denoise_f_motpath_layout.addWidget(self.denoise_f_hind_mot_btn, 0,1)
-        denoise_f_motpath_layout.addWidget(self.denoise_channels_hind_listw,1,0)
-        denoise_f_motpath_layout.addWidget(self.denoise_f_fore_mot_path,2,0)
-        denoise_f_motpath_layout.addWidget(self.denoise_f_fore_mot_btn,2,1)
-        denoise_f_motpath_layout.addWidget(self.denoise_channels_fore_listw,3,0)
-
-        denoise_f_csvpath_layout.addWidget(self.denoise_f_hind_csv_path,0,0)
-        denoise_f_csvpath_layout.addWidget(self.denoise_f_hind_csv_btn,0,1)
-        denoise_f_csvpath_layout.addWidget(self.denoise_f_fore_csv_path,1,0)
-        denoise_f_csvpath_layout.addWidget(self.denoise_f_fore_csv_btn, 1,1)
-
-        denoise_f_layout.addWidget(self.denoise_f_mot_label)
-        denoise_f_layout.addLayout(denoise_f_motpath_layout)
-        denoise_f_layout.addWidget(self.denoise_f_csv_label)
-        denoise_f_layout.addLayout(denoise_f_csvpath_layout)
-        denoise_f_layout.addWidget(self.denoise_f_btn)
-        denoise_f_grp.setLayout(denoise_f_layout)
-
-        #constrain_button_widget
+        # ~~ CONSTRAIN WIDGETS ~~
         self.constrain_btn = QPushButton(text = "Constrain joints to Skeleton Geometry", parent = self)
-        #Import animation Widgets
+
+        # ~~ IMPORT ANIMATINO WIDGETS ~~
         self.use_denoise_fpath = QCheckBox(text = "Use Denoised file" , parent = self)
         self.import_anim_btn = QPushButton( text = "Import Animation", parent = self)
         self.import_anim_hind_path = QLineEdit()
@@ -105,27 +73,12 @@ class KomodoToolsUI(QWidget):
         self.import_anim_fore_path = QLineEdit()
         self.configure_QLineEdit_widgets(self.import_anim_fore_path, "Browse forelimb file...")
         self.importanim_open_fore_btn = QPushButton(text = "open", parent = self)
-        
-        import_anim_grp_box = QGroupBox("Import Animation from CSV")
-        import_anim_layout = QVBoxLayout()
-        import_anim_path_layout = QGridLayout()
-        
-        import_anim_layout.addWidget(self.use_denoise_fpath)
-        import_anim_layout.addLayout(import_anim_path_layout)
-        import_anim_layout.addWidget(self.import_anim_btn)
-        import_anim_grp_box.setLayout(import_anim_layout)
-        import_anim_path_layout.addWidget( self.import_anim_hind_path, 0,0)
-        import_anim_path_layout.addWidget( self.importamin_open_hind_btn, 0,1)
-        import_anim_path_layout.addWidget( self.import_anim_fore_path, 1,0)
-        import_anim_path_layout.addWidget(self.importanim_open_fore_btn,1,1)
-        
-      # mirror widgets
+    
+       # ~~ MIRROR WIDGETS ~~
         self.mirror_keys_btn = QPushButton( text = "Mirror Keys", parent = self)
-      # loopwidgets
-        
-        loop_grp_box = QGroupBox("Loop Animation")
-        loop_grp_layout = QFormLayout()
-        loop_mode_label = QLabel(text = "Looping mode")
+
+       # ~~ LOOP WIDGETS ~~ 
+        self.loop_mode_label = QLabel(text = "Looping mode")
         self.loop_mode_list = QListWidget()
         self.loop_mode_list.insertItem(0,"By count")
         self.loop_mode_list.insertItem(1,"By endpoint")
@@ -133,40 +86,72 @@ class KomodoToolsUI(QWidget):
         self.loop_mode_list.setCurrentRow(0)
         self.stack1 = QWidget()
         self.stack2 = QWidget()
-
         only_int = QIntValidator()
         self.loop_endframe_input = QLineEdit()
-        loop_endframe_label = QLabel(text = "Animation endframe")
+        self.loop_endframe_label = QLabel(text = "Animation endframe")
         self.loop_endframe_input.setValidator(only_int)
-       
-        #self.loop_slider_layout = QHBoxLayout()
-        #self.loop_endpoint_layout = QFormLayout()
-
         self.addloop_stacks(self.stack1)
         self.addloop_stacks(self.stack2)
         self.loop_keys_btn = QPushButton( text = "loop keys", parent = self)
-
         self.master_stack = QStackedWidget(self)
         self.master_stack.addWidget(self.stack1)
         self.master_stack.addWidget(self.stack2)
-        loop_grp_layout.addRow(loop_mode_label,self.loop_mode_list)
-        loop_grp_layout.addRow(loop_endframe_label,self.loop_endframe_input)
+      
+
+    def set_layouts(self):
+
+        # ~~ DENOISE LAYOUT ~~
+        denoise_f_layout = QVBoxLayout()
+        denoise_f_motpath_layout = QGridLayout()
+        denoise_f_csvpath_layout = QGridLayout()
+        denoise_f_motpath_layout.addWidget(self.denoise_hind_mot_path,0,0)
+        denoise_f_motpath_layout.addWidget(self.denoise_hind_mot_btn, 0,1)
+        denoise_f_motpath_layout.addWidget(self.denoise_channels_hind_listw,1,0)
+        denoise_f_motpath_layout.addWidget(self.denoise_fore_mot_path,2,0)
+        denoise_f_motpath_layout.addWidget(self.denoise_fore_mot_btn,2,1)
+        denoise_f_motpath_layout.addWidget(self.denoise_channels_fore_listw,3,0)
+        denoise_f_csvpath_layout.addWidget(self.denoise_hind_csv_path,0,0)
+        denoise_f_csvpath_layout.addWidget(self.denoise_hind_csv_btn,0,1)
+        denoise_f_csvpath_layout.addWidget(self.denoise_fore_csv_path,1,0)
+        denoise_f_csvpath_layout.addWidget(self.denoise_fore_csv_btn, 1,1)
+        denoise_f_layout.addWidget(self.denoise_mot_label)
+        denoise_f_layout.addLayout(denoise_f_motpath_layout)
+        denoise_f_layout.addWidget(self.denoise_csv_label)
+        denoise_f_layout.addLayout(denoise_f_csvpath_layout)
+        denoise_f_layout.addWidget(self.denoise_main_btn)
+        denoise_f_grp_box = QGroupBox("Clean .mot mocapfiles)")
+        denoise_f_grp_box.setLayout(denoise_f_layout)
+
+        # ~~ IMPORT ANIM LAYOUT ~~ 
+        import_anim_layout = QVBoxLayout()
+        import_anim_path_layout = QGridLayout()
+        import_anim_layout.addWidget(self.use_denoise_fpath)
+        import_anim_layout.addLayout(import_anim_path_layout)
+        import_anim_layout.addWidget(self.import_anim_btn)
+        import_anim_path_layout.addWidget( self.import_anim_hind_path, 0,0)
+        import_anim_path_layout.addWidget( self.importamin_open_hind_btn, 0,1)
+        import_anim_path_layout.addWidget( self.import_anim_fore_path, 1,0)
+        import_anim_path_layout.addWidget(self.importanim_open_fore_btn,1,1)
+        import_anim_grp_box = QGroupBox("Import Animation from CSV")
+        import_anim_grp_box.setLayout(import_anim_layout)
+
+        # ~~ LOOP LAYOUT ~~
+        loop_grp_layout = QFormLayout()
+        loop_grp_layout.addRow(self.loop_mode_label,self.loop_mode_list)
+        loop_grp_layout.addRow(self.loop_endframe_label,self.loop_endframe_input)
         loop_grp_layout.addWidget(self.master_stack)
         loop_grp_layout.addRow(self.loop_keys_btn)
+        loop_grp_box = QGroupBox("Loop Animation")
         loop_grp_box.setLayout(loop_grp_layout)
         
-        
-        
-      #Appending Widgets to main layout
-        layout.addWidget(denoise_f_grp)
-        layout.addWidget(self.constrain_btn)
-        layout.addWidget(import_anim_grp_box)
-        layout.addWidget(self.mirror_keys_btn)
-        layout.addWidget(loop_grp_box)
-        self.setLayout(layout)
-
-    def setLayouts(self):
-        
+      # ~~ MASTER LAYOUT ~~
+        master_layout = QVBoxLayout()
+        master_layout.addWidget(denoise_f_grp_box)
+        master_layout.addWidget(self.constrain_btn)
+        master_layout.addWidget(import_anim_grp_box)
+        master_layout.addWidget(self.mirror_keys_btn)
+        master_layout.addWidget(loop_grp_box)
+        self.setLayout(master_layout)
 
     def connect_ui(self):
         self.use_denoise_fpath.stateChanged.connect(self.update_import_anim_ui_status)
@@ -180,16 +165,16 @@ class KomodoToolsUI(QWidget):
         self.loop_endpoint_input.textChanged.connect(lambda: self.update_loop_val(int(self.loop_endpoint_input.text())))
         self.loop_endframe_input.textChanged.connect(lambda: self.update_loop_endframe(self.loop_endframe_input.text()))
         self.loop_keys_btn.clicked.connect(lambda: loop.loop_keys(self.loop_mode,self.loop_value,self.loop_endframe))
-        self.denoise_f_hind_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(True))
-        self.denoise_f_fore_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(False))
-        self.denoise_f_hind_mot_btn.clicked.connect(lambda: self.get_mot_metadata(True))
-        self.denoise_f_fore_mot_btn.clicked.connect(lambda: self.get_mot_metadata(False))
+        self.denoise_hind_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(True))
+        self.denoise_fore_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(False))
+        self.denoise_hind_mot_btn.clicked.connect(lambda: self.get_mot_metadata(True))
+        self.denoise_fore_mot_btn.clicked.connect(lambda: self.get_mot_metadata(False))
         self.importamin_open_hind_btn.clicked.connect(lambda: self.get_csv_filepath(True))
         self.importanim_open_fore_btn.clicked.connect(lambda: self.get_csv_filepath(False))
-        self.denoise_f_btn.clicked.connect(lambda: self.denoise_hind_metadata.generate_csv([self.denoise_channels_hind_listw.row(item) for item in self.denoise_channels_hind_listw.selectedItems()]))
-        self.denoise_f_btn.clicked.connect(lambda: self.denoise_fore_metadata.generate_csv([self.denoise_channels_fore_listw.row(item) for item in self.denoise_channels_fore_listw.selectedItems()]))
-        self.denoise_f_hind_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_hind_metadata.animation_channels,True))
-        self.denoise_f_fore_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_fore_metadata.animation_channels,False))
+        self.denoise_main_btn.clicked.connect(lambda: self.denoise_hind_metadata.generate_csv([self.denoise_channels_hind_listw.row(item) for item in self.denoise_channels_hind_listw.selectedItems()]))
+        self.denoise_main_btn.clicked.connect(lambda: self.denoise_fore_metadata.generate_csv([self.denoise_channels_fore_listw.row(item) for item in self.denoise_channels_fore_listw.selectedItems()]))
+        self.denoise_hind_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_hind_metadata.animation_channels,True))
+        self.denoise_fore_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_fore_metadata.animation_channels,False))
 
 
 
@@ -297,12 +282,12 @@ class KomodoToolsUI(QWidget):
         if isHind == True:
             self.denoise_hind_metadata.mot_fpath = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
             self.denoise_hind_metadata.get_anim_channels()
-            self.denoise_f_hind_mot_path.setText(self.denoise_hind_metadata.mot_fpath)
+            self.denoise_hind_mot_path.setText(self.denoise_hind_metadata.mot_fpath)
         else:
             self.denoise_fore_metadata.mot_fpath = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
             self.denoise_fore_metadata.ishind = False
             self.denoise_fore_metadata.get_anim_channels()
-            self.denoise_f_fore_mot_path.setText(self.denoise_fore_metadata.mot_fpath)
+            self.denoise_fore_mot_path.setText(self.denoise_fore_metadata.mot_fpath)
         #print(self.file_path_hind)
 
 
@@ -310,10 +295,10 @@ class KomodoToolsUI(QWidget):
         f_filter = "*.csv"
         if isHind == True: 
             self.denoise_hind_metadata.csv_fpath = QFileDialog.getSaveFileName(self,"save file as",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",f_filter) [0]
-            self.denoise_f_hind_csv_path.setText(self.denoise_hind_metadata.csv_fpath)
+            self.denoise_hind_csv_path.setText(self.denoise_hind_metadata.csv_fpath)
         else:
             self.denoise_fore_metadata.csv_fpath = QFileDialog.getSaveFileName(self,"save file as",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",f_filter) [0]
-            self.denoise_f_fore_csv_path.setText(self.denoise_fore_metadata.csv_fpath)
+            self.denoise_fore_csv_path.setText(self.denoise_fore_metadata.csv_fpath)
     
     
 
