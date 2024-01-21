@@ -19,11 +19,13 @@ As of writing this the constrain function and the offsets applied to denoised da
 **Installation**
 
 
-  1. For denoising the .mot file you'll have to install SciPy and NumPy. To install these on Maya, first change your directory to Maya's bin folder:`cd C:\Program Files\Autodesk\Maya<version>\bin` then install it there with `mayapy -m pip install numpy/scipy`
+  1. For denoising the .mot file you'll have to install SciPy and NumPy. To install these on Maya, first change your directory to Maya's bin folder:`cd C:\Program Files\Autodesk\Maya<version>\bin` then install both on there with `mayapy -m pip install <module name>`
 
-  2. To make full use of these tools you'll need a skeleton Mesh, a corresponding Advanced Skeleton rig, and a mot file with the keys you want to import. (An example scene will be provided in the near future)
+  2. To make full use of these tools you'll need a skeleton Mesh, a corresponding Advanced Skeleton rig, and a mot file with the keys you want to import. (An example scene is provided)
    
-  3. Append  `C:\Program Files\Autodesk\Maya<version>\scripts\Komodo-Tools`  to  the PYTHONPATH maya.env variable or if that doesn't work append it to pythons sys.path. 
+  3. Place the Komodo-Tools folder in the directory you keep your maya scripts in.
+    
+  4. Add the path of your Komodo-Tools folder to your PYTHONPATH or MAYA_SCRIPT_PATH environment variables in your maya.env file before startup, **or** if that fails boot up maya and run Python's `sys.path.append(<Komodo-tools path>)` in the script editor (although you'll have to do this everytime you boot up maya).  
 
-  4. Open and run the Main script from the script editor and the ui will appear. 
+  5. Open and run the Main script from the script editor and the ui will appear. 
 
