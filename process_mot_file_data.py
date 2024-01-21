@@ -28,6 +28,7 @@ class DenoiseFileData():
         self.mot_fpath = ""
         self.csv_fpath = ""
         self.is_hind = True
+        self.default_sel_indexes =[]
         
 
     def get_anim_channels(self) -> list:
@@ -103,9 +104,9 @@ class DenoiseFileData():
                 each[10]  = -each[10]
             #ankle controller
                 each[11] += ANKLE_OFFSET +20
+
         elif my_list == FORE_DEFAULT_SELECTION: 
             for each in array:
-        
             #chest Yaw/y 
                 each[2] -= 170
             #shoulder_y 

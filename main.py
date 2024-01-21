@@ -6,6 +6,7 @@ import loop_animation_keys as loop
 import process_mot_file_data as denoise
 
 import os
+import sys
 from maya import OpenMayaUI as omui
 from PySide2.QtCore import *
 from PySide2.QtGui import *
@@ -20,8 +21,10 @@ class KomodoToolsUI(QWidget):
         self.setObjectName('KomodoTools_uniqueId')
         self.setWindowTitle('Komodo Tools')
         self.setGeometry(50, 50, 800, 800)
+        
 
         #  ~~ GLOBAL CLASS VARS ~~  
+        self.folder_directory = [x for x in sys.path if x.count("Komodo-Tools") > 0 ][0]
         #-denoise_global vars. 
         self.denoise_hind_metadata = denoise.DenoiseFileData() #contains, file paths, channels, 
         self.denoise_fore_metadata = denoise.DenoiseFileData()
@@ -173,36 +176,32 @@ class KomodoToolsUI(QWidget):
         self.importanim_open_fore_btn.clicked.connect(lambda: self.get_csv_filepath(False))
         self.denoise_main_btn.clicked.connect(lambda: self.denoise_hind_metadata.generate_csv([self.denoise_channels_hind_listw.row(item) for item in self.denoise_channels_hind_listw.selectedItems()]))
         self.denoise_main_btn.clicked.connect(lambda: self.denoise_fore_metadata.generate_csv([self.denoise_channels_fore_listw.row(item) for item in self.denoise_channels_fore_listw.selectedItems()]))
-        self.denoise_hind_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_hind_metadata.animation_channels,True))
-        self.denoise_fore_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_fore_metadata.animation_channels,False))
-
-
-
+        self.denoise_hind_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_hind_metadata,self.denoise_channels_hind_listw))
+        self.denoise_fore_mot_path.textChanged.connect(lambda: self.add_to_denoise_listWidget(self.denoise_fore_metadata,self.denoise_channels_fore_listw))
 
     def configure_QLineEdit_widgets(self,widget: QLineEdit,pholder_text : str) -> None:
         widget.setReadOnly(True)
         widget.setPlaceholderText(pholder_text)
         widget.setMinimumWidth(250)
 
-    def add_to_denoise_listWidget(self, name_list: list,ishind: bool):
-        if  ishind == True:
-            for each in name_list:
-                self.denoise_channels_hind_listw.addItem(each)
-        else:
-            for each in name_list:
-                self.denoise_channels_fore_listw.addItem(each)
-        #pre selecting the channels I want from these mot files by default for ease of testing
-        self.set_select_denoise_widgets([0,1,2,3,4,5,13,14,15,16,17,18,19],True)
-        self.set_select_denoise_widgets([0,1,2,13,14,15,16,17,18,19],False)
+    def add_to_denoise_listWidget(self, mot_metadata: denoise.DenoiseFileData, list_widget: QListWidget):
+        self.delete_existing_denoise_list_items(list_widget)
+        mot_channels_list = mot_metadata.animation_channels
+        default_sel_channel_indexs = mot_metadata.default_sel_indexes
+        for each in mot_channels_list:
+            list_widget.addItem(each)
+        #default preselection item indexes for the mot files I'm using 
+        self.preselect_denoise_listWidg_items(default_sel_channel_indexs,list_widget)
 
-    def set_select_denoise_widgets(self,list_of_indexs: list, hind: bool):
-        
-        if hind == True:
+    def delete_existing_denoise_list_items(self,list_widget: QListWidget):   
+        list_items = [list_widget.item(x) for x in range(list_widget.count())]
+        if not list_items: return
+        for item in list_items:
+            list_widget.takeItem(list_widget.row(item))
+            
+    def preselect_denoise_listWidg_items(self,list_of_indexs: list, list_widget: QListWidget):
             for i in list_of_indexs:
-                self.denoise_channels_hind_listw.setItemSelected(self.denoise_channels_hind_listw.item(i),True)
-        else:
-            for i in list_of_indexs:
-                self.denoise_channels_fore_listw.setItemSelected(self.denoise_channels_fore_listw.item(i), True)
+                list_widget.setItemSelected(list_widget.item(i),True)
 
     def addloop_stacks(self,stack: QWidget):
         
@@ -271,21 +270,27 @@ class KomodoToolsUI(QWidget):
     def get_csv_filepath(self,isHind: bool):
         filter = "*.csv"
         if isHind == True:
-            self.denoise_hind_metadata.csv_fpath = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
+            self.denoise_hind_metadata.csv_fpath = QFileDialog.getOpenFileName(self,"Open File",self.folder_directory,filter )[0]
             self.import_anim_hind_path.setText(self.denoise_hind_metadata.csv_fpath)
         else:
-            self.denoise_fore_metadata.csv_fpath = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
+            self.denoise_fore_metadata.csv_fpath = QFileDialog.getOpenFileName(self,"Open File",self.folder_directory,filter )[0]
             self.import_anim_fore_path.setText(self.denoise_fore_metadata.csv_fpath)
 
     def get_mot_metadata(self,isHind: bool):
         filter = "*.mot"
         if isHind == True:
-            self.denoise_hind_metadata.mot_fpath = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
+            self.denoise_hind_metadata.default_sel_indexes = []
+            self.denoise_hind_metadata.mot_fpath = QFileDialog.getOpenFileName(self,"Open File",self.folder_directory,filter )[0]
+            if os.path.basename(self.denoise_hind_metadata.mot_fpath) == "komodo06_run12_left_hind_IK.mot":
+                self.denoise_hind_metadata.default_sel_indexes = [0,1,2,3,4,5,13,14,15,16,17,18,19]
             self.denoise_hind_metadata.get_anim_channels()
             self.denoise_hind_mot_path.setText(self.denoise_hind_metadata.mot_fpath)
         else:
-            self.denoise_fore_metadata.mot_fpath = QFileDialog.getOpenFileName(self,"Open File",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",filter )[0]
-            self.denoise_fore_metadata.ishind = False
+            self.denoise_fore_metadata.default_sel_indexes = []
+            self.denoise_fore_metadata.mot_fpath = QFileDialog.getOpenFileName(self,"Open File",self.folder_directory,filter )[0]
+            if os.path.basename(self.denoise_fore_metadata.mot_fpath) == "komodo06_run12_left_fore_ik_output rotmat_v2.mot":
+                self.denoise_hind_metadata.default_sel_indexes = [0,1,2,13,14,15,16,17,18,19] 
+            self.denoise_fore_metadata.is_hind = False
             self.denoise_fore_metadata.get_anim_channels()
             self.denoise_fore_mot_path.setText(self.denoise_fore_metadata.mot_fpath)
         #print(self.file_path_hind)
@@ -294,10 +299,10 @@ class KomodoToolsUI(QWidget):
     def get_denoise_csv_filepath(self,isHind: bool):
         f_filter = "*.csv"
         if isHind == True: 
-            self.denoise_hind_metadata.csv_fpath = QFileDialog.getSaveFileName(self,"save file as",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",f_filter) [0]
+            self.denoise_hind_metadata.csv_fpath = QFileDialog.getSaveFileName(self,"save file as",self.folder_directory,f_filter) [0]
             self.denoise_hind_csv_path.setText(self.denoise_hind_metadata.csv_fpath)
         else:
-            self.denoise_fore_metadata.csv_fpath = QFileDialog.getSaveFileName(self,"save file as",r"C:\Users\paulm\Documents\maya\2022\scripts\Komodo-Tools",f_filter) [0]
+            self.denoise_fore_metadata.csv_fpath = QFileDialog.getSaveFileName(self,"save file as",self.folder_directory,f_filter) [0]
             self.denoise_fore_csv_path.setText(self.denoise_fore_metadata.csv_fpath)
     
     

@@ -1,4 +1,3 @@
-*.mot
 *.csv
 __pycache__/
 komodo_colour_muscle_activation/
@@ -6,4 +5,5 @@ temp.py
 list_splicertest.py
 utils/
 .DS_Store
+parenting_lizard_bones.py
 
