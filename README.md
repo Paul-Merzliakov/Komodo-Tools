@@ -27,5 +27,5 @@ As of writing this the constrain function and the offsets applied to denoised da
     
   4. Add the path of your Komodo-Tools folder to your PYTHONPATH or MAYA_SCRIPT_PATH environment variables in your maya.env file before startup, **or** if that fails boot up maya and run Python's `sys.path.append(<Komodo-tools path>)` in the script editor (although you'll have to do this everytime you boot up maya).  
 
-  5. Open and run the Main script from the script editor and the ui will appear. 
+  5. Open and run the `main.py` script from the script editor and the ui will appear. 
 
