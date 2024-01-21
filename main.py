@@ -12,6 +12,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from shiboken2 import wrapInstance
+global Komodo_UI
 
 class KomodoToolsUI(QWidget):
 
@@ -39,6 +40,7 @@ class KomodoToolsUI(QWidget):
         self.build_widgets()
         self.set_layouts()
         self.connect_ui()
+
 
 
     def build_widgets(self):
@@ -317,5 +319,9 @@ def get_main_window():
 
 # Get Maya's main window to parent to
 maya_window = get_main_window()
-tool = KomodoToolsUI(maya_window)
-tool.show()
+try:
+    Komodo_UI.close()
+except NameError:
+    pass
+Komodo_UI = KomodoToolsUI(maya_window)
+Komodo_UI.show()
