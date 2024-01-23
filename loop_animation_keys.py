@@ -22,6 +22,7 @@ def loop_keys(p_loop_mode : int = 0, loop_val: int = 300,endframe: int = 78,*arg
             if cmds.keyframe(attr, q = True) != None:
                 attributes.append(attr)
 
+    #this block of code sets all animation keys to 0 at frame -10. This  make muscle simulating easier
     cmds.currentTime(-10)
     for cntrl in keyed_controls:
         cntrl_attrs = [x for x in cmds.listAttr(cntrl, keyable = True) if cmds.keyframe(cntrl + "." + x , q = True) != None]
@@ -46,6 +47,3 @@ def loop_keys(p_loop_mode : int = 0, loop_val: int = 300,endframe: int = 78,*arg
             #print(i)
             cmds.pasteKey(time = ( i,i), option = "merge", copies = 1)
 
-
-def get_keyed_attributes():
-    pass
