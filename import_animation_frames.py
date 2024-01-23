@@ -38,7 +38,6 @@ def set_key(cntroller,start_frame,data):
         frame += 1
     print(animation_ranges)
     for each in cntroller[:len(cntroller) - 5]:
-        # frames_to_add = round(len(data[::100])/8)
         #use linear interpolation where time is x and value is y
         if each == "Main.translateZ":
             continue
@@ -46,8 +45,7 @@ def set_key(cntroller,start_frame,data):
             value_0 = animation_ranges[cntroller.index(each)][1]
             value_f = animation_ranges[cntroller.index(each)][0]
             time_0 = 1
-            time_f = 5 # number of frames to add minus 2 
-            # print(each,"value_0 is: ",value_0, "value_f is: ", value_f,"time_0 is: " , time_0, "time_f is: ", time_f)
+            time_f = 5 # number of frames to add minus 2
             for time_n in range(time_0+1,time_f+1): # this should produce three interpolated points
                     cmds.currentTime(end_frame+time_n - 1)
                     value_n = value_0 + ((value_f - value_0) / (time_f - time_0))*(time_n - time_0)
@@ -61,12 +59,16 @@ def set_key(cntroller,start_frame,data):
 
 def create_animation(hind_path, fore_path ,*args):
     hind_controller_names = [
-        "IKSpine1_M.rotateX","IKSpine1_M.rotateZ", "IKSpine1_M.rotateY","Main.translateZ","Main.translateX","Main.translateY","FKHip_R.rotateY","FKHip_R.rotateZ","FKHip_R.rotateX",
-        "FKKnee_R.rotateZ","FKTwistLeg_R.rotateX","FKToes1_R.rotateX","FKBigToe1_R.rotateZ","FKIndexToe1_R.rotateZ","FKMiddleToe1_R.rotateZ", "FKRingToe1_R.rotateZ", "FKPinkyToe1_R.rotateZ"
+        "IKSpine1_M.rotateX","IKSpine1_M.rotateZ", "IKSpine1_M.rotateY","Main.translateZ","Main.translateX"
+        ,"Main.translateY","FKHip_R.rotateY","FKHip_R.rotateZ","FKHip_R.rotateX",
+        "FKKnee_R.rotateZ","FKTwistLeg_R.rotateX","FKToes1_R.rotateX","FKBigToe1_R.rotateZ","FKIndexToe1_R.rotateZ"
+        ,"FKMiddleToe1_R.rotateZ", "FKRingToe1_R.rotateZ", "FKPinkyToe1_R.rotateZ"
         ]
     fore_controller_names = [
-        'IKSpine3_M.rotateX', 'IKSpine3_M.rotateZ', 'IKSpine3_M.rotateY', 'FKShoulder_R.rotateY', 'FKShoulder_R.rotateZ', 'FKShoulder_R.rotateX', 'FKElbow_R.rotateZ', 'FKTwistArm_R.rotateX',
-        'FKFingers1_R.rotateZ','FKThumbFinger1_R.rotateZ','FKIndexFinger1_R.rotateZ', 'FKMiddleFinger1_R.rotateZ', 'FKRingFinger1_R.rotateZ', "FKPinkyFinger1_R.rotateZ"
+        'IKSpine3_M.rotateX', 'IKSpine3_M.rotateZ', 'IKSpine3_M.rotateY', 'FKShoulder_R.rotateY', 'FKShoulder_R.rotateZ'
+        , 'FKShoulder_R.rotateX', 'FKElbow_R.rotateZ', 'FKTwistArm_R.rotateX',
+        'FKFingers1_R.rotateZ','FKThumbFinger1_R.rotateZ','FKIndexFinger1_R.rotateZ', 'FKMiddleFinger1_R.rotateZ',
+        'FKRingFinger1_R.rotateZ', "FKPinkyFinger1_R.rotateZ"
         ]
     #delete existing keyframes:
     delete_keyframes(hind_controller_names)

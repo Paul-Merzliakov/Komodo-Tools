@@ -1,12 +1,8 @@
-"""
-FIX LOOP KEYS - NOT WORKING TEST IN ISOLATION WITH THE UI THEN WITH IT TO FIND WHATS WRONG
-instead of adding an identical animation endframe widget to both stacks, why dont you add it to the layout and just have the two different ones in the stack?
-"""
 import maya.cmds as cmds
 
 
 def loop_keys(p_loop_mode : int = 0, loop_val: int = 300,endframe: int = 78,*args):
-    # loop val is a generic input variable that gets copied to a loop_count or loop endpoint depending on the mode. this is redundant but thought it would be good for clarity.
+    # loop val is a generic input variable that gets copied to a loop_count or loop endpoint depending on the mode.
     all_controls = cmds.ls(transforms = True) 
     print(p_loop_mode, loop_val, endframe)
     keyed_controls  = []

@@ -173,6 +173,10 @@ class KomodoToolsUI(QWidget):
             lambda: self.add_to_denoise_listWidget(self.denoise_fore_metadata, self.denoise_channels_fore_listw))
 
     def configure_filepath_widgets(self, widget: QLineEdit, pholder_text: str) -> None:
+        """
+        takes a widget intended to represent the filepath and configures it.
+        input: QlineWidget intendended to display the file path, and placeholder text
+        """
         widget.setReadOnly(True)
         widget.setPlaceholderText(pholder_text)
         widget.setMinimumWidth(250)
@@ -196,7 +200,9 @@ class KomodoToolsUI(QWidget):
             list_widget.setItemSelected(list_widget.item(i), True)
 
     def addloop_stacks(self, stack: QWidget):
-
+        """
+        this creates the widgets for each stack  tied to the two "loop mode" list widget options
+        """
         # first row - input final animation frame
         if stack == self.stack1:
 
