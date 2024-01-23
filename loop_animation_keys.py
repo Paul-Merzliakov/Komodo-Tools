@@ -4,26 +4,27 @@ instead of adding an identical animation endframe widget to both stacks, why don
 """
 import maya.cmds as cmds
 
-#loop val is a generic input variable that gets copied to a loop_count or loop endpoint depending on the mode. this is redundant but thought it would be good for clarity. 
+
 def loop_keys(p_loop_mode : int = 0, loop_val: int = 300,endframe: int = 78,*args):
+    # loop val is a generic input variable that gets copied to a loop_count or loop endpoint depending on the mode. this is redundant but thought it would be good for clarity.
     all_controls = cmds.ls(transforms = True) 
     print(p_loop_mode, loop_val, endframe)
     keyed_controls  = []
-    for each in all_controls:
+    for control in all_controls:
         cmds.select(cl=True)
-        if cmds.selectKey(each) > 0:
-            keyed_controls.append(each)
+        if cmds.selectKey(control) > 0:
+            keyed_controls.append(control)
 
     attributes = [] 
-    for each in keyed_controls:
-        control_attributes  = [each + "." + x for x in cmds.listAttr(each, keyable = True)]
+    for keyed_control in keyed_controls:
+        control_attributes  = [keyed_control + "." + x for x in cmds.listAttr( keyed_control,  keyable = True)]
         for attr in control_attributes:
             if cmds.keyframe(attr, q = True) != None:
                 attributes.append(attr)
 
     cmds.currentTime(-10)
     for cntrl in keyed_controls:
-        cntrl_attrs = [x for x in cmds.listAttr(each, keyable = True) if cmds.keyframe(cntrl + "." + x , q = True) != None]
+        cntrl_attrs = [x for x in cmds.listAttr(cntrl, keyable = True) if cmds.keyframe(cntrl + "." + x , q = True) != None]
         for attr in cntrl_attrs:
             cmds.setKeyframe( cntrl, attribute = attr, v = 0)
             print("set keyframe for ", attr)#debugg
@@ -45,9 +46,6 @@ def loop_keys(p_loop_mode : int = 0, loop_val: int = 300,endframe: int = 78,*arg
             #print(i)
             cmds.pasteKey(time = ( i,i), option = "merge", copies = 1)
 
-        
 
-
-    
-
-
+def get_keyed_attributes():
+    pass

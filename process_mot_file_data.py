@@ -39,8 +39,8 @@ class DenoiseFileData():
         with open(mot_file_name) as f:
             flines = f.readlines()
             self.num_of_lines += len(flines)
-            for i in range(self.num_of_lines): #these are the str_lines that have the actual values
-                str_lines.append(flines[i])
+            for line_num in range(self.num_of_lines): #these are the str_lines that have the actual values
+                str_lines.append(flines[line_num])
 
         endheader_index = self.get_end_of_header(str_lines)
         self.animation_channels = str_lines[endheader_index].split('\t')[1:]
@@ -72,16 +72,16 @@ class DenoiseFileData():
             num_of_lines += len(flines)
             for i in range(start,num_of_lines): #these are the str_lines that have the actual values
                 str_lines.append(flines[i])
-        array= []
-        for each in str_lines:
-            splitlines = []
-            for val in each.split("\t"):
-                splitlines.append(float(val.strip()))
-            array_row = [splitlines[i] for i in channel_indexs]
-            array.append(array_row)
+        anim_keys_array= []
+        for str_line in str_lines:
+            row_of_anim_keys = []
+            for string_num in str_line.split("\t"):
+                row_of_anim_keys.append(float(string_num.strip()))
+            array_row = [row_of_anim_keys[i] for i in channel_indexs]
+            anim_keys_array.append(array_row)
         #need to make sure this doesnt run if the selection doesnt match the default values 
         if self.is_hind == True and my_list == HIND_DEFAULT_SELECTION:
-            for each in array:
+            for each in anim_keys_array:
             #pelvis pitch
                 each[0] *= -.5
             #pelvis roll/ rotatez
@@ -106,7 +106,7 @@ class DenoiseFileData():
                 each[11] += ANKLE_OFFSET +20
 
         elif my_list == FORE_DEFAULT_SELECTION: 
-            for each in array:
+            for each in anim_keys_array:
             #chest Yaw/y 
                 each[2] -= 170
             #shoulder_y 
@@ -124,9 +124,9 @@ class DenoiseFileData():
             #knee flexion
                 each[9] -= HAND_OFFSET
 
-        csv_array = savgol_filter(array,555,3,axis = 0)#right leg joints are index 14 to 20
+        csv_array = savgol_filter(anim_keys_array,555,3,axis = 0)#right leg joints are index 14 to 20
         # print(csv_array[0]) 
-        # csv_array = numpy.array(array)
+        # csv_array = numpy.anim_keys_array(anim_keys_array)
         os.chdir(smoothed_dir)
         numpy.savetxt(csv_file_name, csv_array,fmt = '%.3f',delimiter = ",")
 
