@@ -1,9 +1,3 @@
-import import_animation_frames as anim
-import Parent_constrain_bones_to_joints as cstrain
-import mirror_keys as mir
-import loop_animation_keys as loop
-import process_mot_file_data as denoise
-
 import os
 import sys
 from maya import OpenMayaUI as omui
@@ -12,8 +6,12 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from shiboken2 import wrapInstance
 
-
-
+import import_animation_frames as anim
+import Parent_constrain_bones_to_joints as cstrain
+import mirror_keys as mir
+import loop_animation_keys as loop
+import process_mot_file_data as denoise
+import constants
 class KomodoToolsUI(QWidget):
 
     def __init__(self, parent=None):
@@ -207,6 +205,7 @@ class KomodoToolsUI(QWidget):
         if stack == self.stack1:
 
             # creating widgets
+
             self.loop_count_slider = QSlider(Qt.Horizontal, self)
             self.loop_count_slider.setTickInterval(1)
             self.loop_count_slider.setMinimum(1)
@@ -281,7 +280,7 @@ class KomodoToolsUI(QWidget):
             self.denoise_hind_metadata.mot_fpath = \
             QFileDialog.getOpenFileName(self, "Open File", self.folder_directory, filter)[0]
             if os.path.basename(self.denoise_hind_metadata.mot_fpath) == "komodo06_run12_left_hind_IK.mot":
-                self.denoise_hind_metadata.default_sel_indexes = [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18, 19]
+                self.denoise_hind_metadata.default_sel_indexes = constants.DEFAULT_HIND_SELECTION
             self.denoise_hind_metadata.get_anim_channels()
             self.denoise_hind_mot_path.setText(self.denoise_hind_metadata.mot_fpath)
         else:
@@ -290,7 +289,7 @@ class KomodoToolsUI(QWidget):
             QFileDialog.getOpenFileName(self, "Open File", self.folder_directory, filter)[0]
             if os.path.basename(
                     self.denoise_fore_metadata.mot_fpath) == "komodo06_run12_left_fore_IK_output rotmat_v2.mot":
-                self.denoise_fore_metadata.default_sel_indexes = [0, 1, 2, 13, 14, 15, 16, 17, 18, 19]
+                self.denoise_fore_metadata.default_sel_indexes = constants.DEFAULT_FORE_SELECTION
             self.denoise_fore_metadata.is_hind = False
             self.denoise_fore_metadata.get_anim_channels()
             self.denoise_fore_mot_path.setText(self.denoise_fore_metadata.mot_fpath)

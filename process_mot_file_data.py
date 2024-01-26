@@ -17,8 +17,7 @@ TWIST_OFFSET = 125
 WRIST_OFFSET = 60
 HAND_OFFSET = 20
 
-HIND_DEFAULT_SELECTION = [0, 1, 2, 3, 4, 5, 13, 14, 15, 16, 17, 18, 19]
-FORE_DEFAULT_SELECTION = [0, 1, 2, 13, 14, 15, 16, 17, 18, 19]
+
 
 
 class DenoiseFileData():
@@ -64,7 +63,7 @@ class DenoiseFileData():
 
     def generate_csv(self, selected_channel_indexs: list) -> None:
         """
-        input: list of in
+        input: list of ints
         input class_vars: mot_fpath, is_hind
         outputs: csv file with smoothed data.
         """
@@ -101,7 +100,7 @@ class DenoiseFileData():
         takes a 2 dimensional list and applies offsets to each channel.
         atm this only runs  if using the default file and selection index.
         """
-        if self.is_hind == True and selected_channel_indexs == HIND_DEFAULT_SELECTION:
+        if self.is_hind == True and selected_channel_indexs == self.default_sel_indexes:
             for each in anim_keys_array:
                 # pelvis pitch/ rotatex
                 each[0] *= -.5
@@ -126,7 +125,7 @@ class DenoiseFileData():
                 # ankle controller
                 each[11] += ANKLE_OFFSET + 20
 
-        elif selected_channel_indexs == FORE_DEFAULT_SELECTION:
+        elif selected_channel_indexs == self.default_sel_indexes:
             for each in anim_keys_array:
                 # chest Yaw/y
                 each[2] -= 170
