@@ -2,22 +2,32 @@
 import os
 from scipy.signal import savgol_filter
 import numpy
+import csv
+import constants as consts
+
 
 # Hindlimb Offsets
-HIPZ_OFFSET = 10
-HIPX_OFFSET = 115
-PELVISY_OFFSET = 165
-KNEE_OFFSET = 85
-ANKLE_OFFSET = 115
 # Forelimb Offsets
-SHOULDERZ_OFFSET = 10
-SHOULDERX_OFFSET = 115
-ELBOW_OFFSET = 80
-TWIST_OFFSET = 125
-WRIST_OFFSET = 60
-HAND_OFFSET = 20
 
+def get_anim_keys_from_csv(csv_fpath: str) ->list: 
+    """
+    this is used exclusively by import animation frames 
+    it takes in a csv_file_path and returns that csv file's animation keys in the form of a 2 dimensional list of floats 
+    """
+    existing_csv_directory,existing_csv_name = os.path.split(csv_fpath)
 
+    os.chdir(existing_csv_directory)
+    raw_csv_data= []
+    with open(existing_csv_name) as csv_f:
+        freader = csv.reader(csv_f,delimiter =',')
+        flines = list(freader)#these are the lines that have the actual values
+        for line_i in range(len(flines)): 
+            raw_csv_data.append(flines[line_i])
+    anim_keys =[]
+    for str_keys_row in raw_csv_data[::consts.DEFAULT_ANIM_DATA_STEP]:
+        keys_row = [float(str_key.strip()) for str_key in str_keys_row]
+        anim_keys.append(keys_row)
+    return anim_keys    
 
 
 class DenoiseFileData():
@@ -26,6 +36,7 @@ class DenoiseFileData():
         self.animation_channels = []
         self.mot_fpath = ""
         self.csv_fpath = ""
+        self.existing_csv_fpath = ""
         self.is_hind = True
         self.default_sel_indexes = []
 
@@ -47,6 +58,8 @@ class DenoiseFileData():
 
         endheader_index = self.get_end_of_header(str_lines)
         self.animation_channels = str_lines[endheader_index].split('\t')[1:]
+
+        
 
     def get_end_of_header(self, f_string_list: list) -> int:
         """
@@ -102,47 +115,47 @@ class DenoiseFileData():
         """
         if self.is_hind == True and selected_channel_indexs == self.default_sel_indexes:
             for each in anim_keys_array:
-                # pelvis pitch/ rotatex
-                each[0] *= -.5
-                # pelvis roll/ rotatez
-                each[1] += HIPZ_OFFSET
-                # pelvis yaw/ rotatey
-                each[2] -= PELVISY_OFFSET
+                # pelvis pitch
+                each[0] *= consts.PELVIS_ROT_X_MODIFIER
+                # pelvis roll
+                each[1] += consts.PELVIS_ROT_Z_MODIFIER
+                # pelvis yaw
+                each[2] -= consts.PELVIS_ROT_Y_MODIFIER
                 # pelvis foward
-                each[3] *= -100
+                each[3] *= consts.PELVIS_TRANSL_Z_MODIFIER
                 # pelvis side to side translate
-                each[4] *= 100
-                # hip extension/ flexion  (yrotation)
-                each[6] = -(each[6] / 1.1)
-                # hip abduction, (zrotation)g
-                each[7] += 10
-                # hip lar, (xrotation)
-                each[8] = -(each[8] / 1.)
-                # knee flexion
-                each[9] += KNEE_OFFSET
-                # twist
-                each[10] = -each[10]
-                # ankle controller
-                each[11] += ANKLE_OFFSET + 20
+                each[4] *= consts.PELVIS_TRANSL_X_MODIFIER
+                # hip extension/ flexion 
+                each[6] = -(each[6] / consts.HIP_ROT_Y_MODIFIER)
+                # hip abduction,
+                each[7] += consts.HIP_ROT_Z_MODIFIER
+                # hip lar,
+                each[8] *= consts.HIP_ROT_X_MODIFIER
+                # knee flexion(rotate Z)
+                each[9] += consts.KNEE_MODIIFIER
+                # twist(rotate x)
+                each[10] *= consts.LEG_TWIST_X_MODIFIER
+                # ankle controller (rotate z)
+                each[11] = (.6 * each[11])  + consts.ANKLE_MODIFIER
 
         elif selected_channel_indexs == self.default_sel_indexes:
             for each in anim_keys_array:
                 # chest Yaw/y
-                each[2] -= 170
-                # shoulder_y
-                each[3] /= 2
-                # shoulder_z
-                each[4] = -each[4] - 20
-                # shoulder_x
-                each[5] = -each[5] - 15
-                # elbowx
-                each[6] = -each[6] - ELBOW_OFFSET
-                # twist
-                each[7] = -each[7] + TWIST_OFFSET
-                # wrist
-                each[8] = -each[8] - WRIST_OFFSET
-                # knee flexion
-                each[9] -= HAND_OFFSET
+                each[2] -= consts.CHEST_ROT_Y_MODIFIER
+                # shoulder extension / flexion
+                each[3] /= consts.SHOULDER_ROT_Y_MODIFIER
+                # shoulder abdduction/adduction
+                each[4] = -each[4] - consts.SHOULDER_ROT_Z_MODIFIER
+                # shoulder lar
+                each[5] = -each[5] - consts.SHOULDER_ROT_X_MODIFIER
+                # elbow (rotate z)
+                each[6] = -each[6] - consts.ELBOW_MODIFIER
+                # twist(rotatex
+                each[7] = -each[7] + consts.ARM_TWIST_MODIFIER
+                # wrist (rotate z)
+                each[8] = -each[8] - consts.WRIST_MODIFIER
+                # fingers (rotatez )
+                each[9] -= consts.HAND_MODIFIER
 
 # right leg
 # generate_csv( "komodo06_run12_left_hind_IK.mot",True, (1,7), "Varius_right_hind_smoothed.csv" )

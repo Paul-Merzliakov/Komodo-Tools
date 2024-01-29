@@ -10,8 +10,8 @@ import import_animation_frames as anim
 import Parent_constrain_bones_to_joints as cstrain
 import mirror_keys as mir
 import loop_animation_keys as loop
-import process_mot_file_data as denoise
-import constants
+import process_denoise_file_data as denoise
+import constants as consts
 class KomodoToolsUI(QWidget):
 
     def __init__(self, parent=None):
@@ -21,11 +21,11 @@ class KomodoToolsUI(QWidget):
         self.setWindowTitle('Komodo Tools')
         self.setGeometry(50, 50, 800, 800)
         #  ~~ GLOBAL CLASS VARS ~~
-        self.folder_directory = [x for x in sys.path if x.count("Komodo-Tools") > 0][0]
+        self.default_search_directory = [x for x in sys.path if x.count("Komodo-Tools") > 0][0]
         # -denoise_global vars.
         self.denoise_hind_metadata = denoise.DenoiseFileData()  # contains, file paths, channels,
         self.denoise_fore_metadata = denoise.DenoiseFileData()
-        # -import animation global vars-
+        # -import animation global vars
         self.file_path_hind_var = ''
         self.file_path_fore_var = ''
         # -loop Keys global vars-
@@ -143,9 +143,11 @@ class KomodoToolsUI(QWidget):
         self.setLayout(master_layout)
 
     def connect_ui(self):
+        IS_HIND = True
+        IS_FORE = False
         self.use_denoise_fpath.stateChanged.connect(self.update_import_anim_ui_status)
         self.constrain_btn.clicked.connect(cstrain.constrain_bones)
-        self.import_anim_btn.clicked.connect(self.import_animation_wrapper)
+        self.import_anim_btn.clicked.connect(self.import_animation_btn_wrapper)
         self.mirror_keys_btn.clicked.connect(mir.mirror)
         self.loop_mode_list.currentRowChanged.connect(self.update_loop_mode)
         self.loop_mode_list.currentRowChanged.connect(self.set_loop_stack_display)
@@ -155,12 +157,12 @@ class KomodoToolsUI(QWidget):
         self.loop_endpoint_input.textChanged.connect(lambda: self.update_loop_val(int(self.loop_endpoint_input.text())))
         self.loop_endframe_input.textChanged.connect(lambda: self.update_loop_endframe(self.loop_endframe_input.text()))
         self.loop_keys_btn.clicked.connect(lambda: loop.loop_keys(self.loop_mode, self.loop_value, self.loop_endframe))
-        self.denoise_hind_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(True))
-        self.denoise_fore_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(False))
-        self.denoise_hind_mot_btn.clicked.connect(lambda: self.get_mot_metadata(True))
-        self.denoise_fore_mot_btn.clicked.connect(lambda: self.get_mot_metadata(False))
-        self.importamin_open_hind_btn.clicked.connect(lambda: self.get_csv_filepath(True))
-        self.importanim_open_fore_btn.clicked.connect(lambda: self.get_csv_filepath(False))
+        self.denoise_hind_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(IS_HIND))
+        self.denoise_fore_csv_btn.clicked.connect(lambda: self.get_denoise_csv_filepath(IS_FORE))
+        self.denoise_hind_mot_btn.clicked.connect(lambda: self.get_mot_metadata(IS_HIND))
+        self.denoise_fore_mot_btn.clicked.connect(lambda: self.get_mot_metadata(IS_FORE))
+        self.importamin_open_hind_btn.clicked.connect(lambda: self.get_existing_csv_filepath(IS_HIND)) 
+        self.importanim_open_fore_btn.clicked.connect(lambda: self.get_existing_csv_filepath(IS_FORE))
         self.denoise_main_btn.clicked.connect(lambda: self.denoise_hind_metadata.generate_csv(
             [self.denoise_channels_hind_listw.row(item) for item in self.denoise_channels_hind_listw.selectedItems()]))
         self.denoise_main_btn.clicked.connect(lambda: self.denoise_fore_metadata.generate_csv(
@@ -173,7 +175,6 @@ class KomodoToolsUI(QWidget):
     def configure_filepath_widgets(self, widget: QLineEdit, pholder_text: str) -> None:
         """
         takes a widget intended to represent the filepath and configures it.
-        input: QlineWidget intendended to display the file path, and placeholder text
         """
         widget.setReadOnly(True)
         widget.setPlaceholderText(pholder_text)
@@ -243,16 +244,19 @@ class KomodoToolsUI(QWidget):
             self.importamin_open_hind_btn.setDisabled(False)
             self.importanim_open_fore_btn.setDisabled(False)
 
-    def import_animation_wrapper(self):
+    def import_animation_btn_wrapper(self):
         if self.use_denoise_fpath.isChecked() == True:
-            anim.create_animation(self.denoise_hind_metadata.csv_fpath, self.denoise_fore_metadata)
+            anim.set_anim_keys(consts.DEFAULT_HIND_ANIM_ATTRS, consts.DEFAULT_HIND_ANIM_START_FRAME, self.denoise_hind_metadata.csv_fpath)
+            anim.set_anim_keys(consts.DEFAULT_FORE_ANIM_ATTRS, consts.DEFAULT_FORE_ANIM_START_FRAME, self.denoise_fore_metadata.csv_fpath)
+
         else:
-            anim.create_animation(self.file_path_hind_var, self.file_path_fore_var)
+            anim.set_anim_keys(consts.DEFAULT_HIND_ANIM_ATTRS, consts.DEFAULT_HIND_ANIM_START_FRAME, self.denoise_hind_metadata.existing_csv_fpath)
+            anim.set_anim_keys(consts.DEFAULT_FORE_ANIM_ATTRS, consts.DEFAULT_FORE_ANIM_START_FRAME, self.denoise_fore_metadata.existing_csv_fpath)
 
     def set_loop_count_display(self, i):
         self.loop_count_num.setText(i)
 
-    # update functions for Global variables
+    # update functions for Global variables 
     def update_loop_mode(self, i):
         self.loop_mode = i
 
@@ -261,35 +265,34 @@ class KomodoToolsUI(QWidget):
 
     def update_loop_endframe(self, i):
         self.loop_endframe = int(i)
-
-    def get_csv_filepath(self, isHind: bool):
+    
+    #update functions for motfile class variables
+    def get_existing_csv_filepath(self, is_hind : bool):
         filter = "*.csv"
-        if isHind:
-            self.denoise_hind_metadata.csv_fpath = \
-            QFileDialog.getOpenFileName(self, "Open File", self.folder_directory, filter)[0]
-            self.import_anim_hind_path.setText(self.denoise_hind_metadata.csv_fpath)
+        if is_hind:
+            self.denoise_hind_metadata.existing_csv_fpath = \
+            QFileDialog.getOpenFileName(self, "Open File", self.default_search_directory, filter)[0]
+            self.import_anim_hind_path.setText(self.denoise_hind_metadata.existing_csv_fpath)
         else:
-            self.denoise_fore_metadata.csv_fpath = \
-            QFileDialog.getOpenFileName(self, "Open File", self.folder_directory, filter)[0]
-            self.import_anim_fore_path.setText(self.denoise_fore_metadata.csv_fpath)
+            self.denoise_fore_metadata.existing_csv_fpath = \
+            QFileDialog.getOpenFileName(self, "Open File", self.default_search_directory, filter)[0]
+            self.import_anim_fore_path.setText(self.denoise_fore_metadata.existing_csv_fpath)
 
     def get_mot_metadata(self, isHind: bool):
         filter = "*.mot"
         if isHind:
-            self.denoise_hind_metadata.default_sel_indexes = []
             self.denoise_hind_metadata.mot_fpath = \
-            QFileDialog.getOpenFileName(self, "Open File", self.folder_directory, filter)[0]
-            if os.path.basename(self.denoise_hind_metadata.mot_fpath) == "komodo06_run12_left_hind_IK.mot":
-                self.denoise_hind_metadata.default_sel_indexes = constants.DEFAULT_HIND_SELECTION
+            QFileDialog.getOpenFileName(self, "Open File", self.default_search_directory, filter)[0]
+            if os.path.basename(self.denoise_hind_metadata.mot_fpath) == consts.DEFAULT_HIND_MOT_FILENAME:
+                self.denoise_hind_metadata.default_sel_indexes = consts.DEFAULT_HIND_SELECTION
             self.denoise_hind_metadata.get_anim_channels()
             self.denoise_hind_mot_path.setText(self.denoise_hind_metadata.mot_fpath)
         else:
-            self.denoise_fore_metadata.default_sel_indexes = []
             self.denoise_fore_metadata.mot_fpath = \
-            QFileDialog.getOpenFileName(self, "Open File", self.folder_directory, filter)[0]
+            QFileDialog.getOpenFileName(self, "Open File", self.default_search_directory, filter)[0]
             if os.path.basename(
-                    self.denoise_fore_metadata.mot_fpath) == "komodo06_run12_left_fore_IK_output rotmat_v2.mot":
-                self.denoise_fore_metadata.default_sel_indexes = constants.DEFAULT_FORE_SELECTION
+                    self.denoise_fore_metadata.mot_fpath) == consts.DEFAULT_FORE_MOT_FILENAME:
+                self.denoise_fore_metadata.default_sel_indexes = consts.DEFAULT_FORE_SELECTION
             self.denoise_fore_metadata.is_hind = False
             self.denoise_fore_metadata.get_anim_channels()
             self.denoise_fore_mot_path.setText(self.denoise_fore_metadata.mot_fpath)
@@ -298,11 +301,11 @@ class KomodoToolsUI(QWidget):
         f_filter = "*.csv"
         if isHind:
             self.denoise_hind_metadata.csv_fpath = \
-            QFileDialog.getSaveFileName(self, "save file as", self.folder_directory, f_filter)[0]
+            QFileDialog.getSaveFileName(self, "save file as", self.default_search_directory, f_filter)[0]
             self.denoise_hind_csv_path.setText(self.denoise_hind_metadata.csv_fpath)
         else:
             self.denoise_fore_metadata.csv_fpath = \
-            QFileDialog.getSaveFileName(self, "save file as", self.folder_directory, f_filter)[0]
+            QFileDialog.getSaveFileName(self, "save file as", self.default_search_directory, f_filter)[0]
             self.denoise_fore_csv_path.setText(self.denoise_fore_metadata.csv_fpath)
 
 
