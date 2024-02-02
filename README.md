@@ -14,7 +14,7 @@ Features include:                                                               
   - Looping the animation to a certain frame.
   - Looping by  x number of times. 
 
-As of writing this the constrain function and the offsets applied to denoised data are still hardcoded for the specific model and mot file I used. I will be rewriting those shortly.
+As of writing this the constrain function and the offsets applied to denoised data are still hardcoded for the specific model and mot file I used.  If there's any interest, I'd be open to rewriting these to be useable for various models/ mot files. 
 
 **Installation**
 
